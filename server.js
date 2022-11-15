@@ -8,7 +8,7 @@ const stripe = require("stripe")('sk_test_51Lz2fwSFXlRmJxANBk82cVXjb8bmXQIl6gXus
 
 app.use(express.static("public"));
 app.use(express.json());
-app.use(cors())
+app.use(cors()
 
 
 app.post("/create-payment-intent", async (req, res) => {
