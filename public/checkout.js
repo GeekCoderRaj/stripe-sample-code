@@ -8,19 +8,27 @@ const items = [{ id: "xl-tshirt" }];
 
 let elements;
 
-initialize();
-checkStatus();
+// initialize();
+// checkStatus();
 
 document
   .querySelector("#payment-form")
   .addEventListener("submit", handleSubmit);
 
+document.getElementById("initi").addEventListener("click",initialize);  
+  // const amount = document.getElementById("amount");
+  // const address = document.getElementById("address");  
+
+
 // Fetches a payment intent and captures the client secret
-async function initialize() {
+async function initialize(e) {
+  e.preventDefault();
+  const address = document.getElementById("add").value;
+  const amount = document.getElementById("amt").value;
   const response = await fetch("http://127.0.0.1:4242/create-payment-intent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ items ,address, amount}),
   });
   const { clientSecret } = await response.json();
 
@@ -34,22 +42,29 @@ async function initialize() {
 }
 
 async function handleSubmit(e) {
-  e.preventDefault();
+ 
+//   initialize();
+// checkStatus();
+  console.log("HIHIH");
   setLoading(true);
-
+  console.log("sfaf")
+  const address = document.getElementById("add").value;
+  const amount = document.getElementById("amt").value;
+  const response = await fetch("http://127.0.0.1:5000/", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items ,address, amount}),
+  });
   const { error } = await stripe.confirmPayment({
     elements,
     confirmParams: {
+      
       // Make sure to change this to your payment completion page
       return_url: "http://localhost:4242/checkout.html",
     },
   });
 
-  // This point will only be reached if there is an immediate error when
-  // confirming the payment. Otherwise, your customer will be redirected to
-  // your `return_url`. For some payment methods like iDEAL, your customer will
-  // be redirected to an intermediate site first to authorize the payment, then
-  // redirected to the `return_url`.
+
   if (error.type === "card_error" || error.type === "validation_error") {
     showMessage(error.message);
   } else {
@@ -59,7 +74,7 @@ async function handleSubmit(e) {
   setLoading(false);
 }
 
-// Fetches the payment intent status after payment submission
+
 async function checkStatus() {
   const clientSecret = new URLSearchParams(window.location.search).get(
     "payment_intent_client_secret"
